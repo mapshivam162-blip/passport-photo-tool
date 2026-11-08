@@ -28,6 +28,7 @@
       <div class="brand-sub">Photo banayein • 20KB/50KB compress • Print sheet</div>
     </div>
     <span class="badge">100% FREE</span>
+    <button class="theme-btn" id="themeBtn" aria-label="Theme badlein">🌙</button>
   </div>
 </header>
 
@@ -160,12 +161,28 @@
       <div class="ctrl">
         <label>Popular Form Presets</label>
         <div class="chips" id="presetChips">
-          <button class="chip" data-p='{"mode":"passport","dim":413,"kb":50}'>SSC 413×531 · 50KB</button>
-          <button class="chip" data-p='{"mode":"passport","dim":413,"kb":20}'>Railway · 20KB</button>
+          <button class="chip" data-p='{"mode":"passport","dim":413,"kb":20}'>SSC GD · 20KB</button>
+          <button class="chip" data-p='{"mode":"passport","dim":413,"kb":50}'>SSC CGL · 50KB</button>
+          <button class="chip" data-p='{"mode":"passport","dim":413,"kb":20}'>Railway RRB · 20KB</button>
           <button class="chip" data-p='{"mode":"passport","dim":600,"kb":40}'>UPSC · 40KB</button>
+          <button class="chip" data-p='{"mode":"passport","dim":413,"kb":20}'>Bank IBPS · 20KB</button>
           <button class="chip" data-p='{"mode":"compress","dim":1200,"kb":50}'>Signature · 50KB</button>
           <button class="chip" data-p='{"mode":"passport","dim":600,"kb":0}'>Best Quality</button>
         </div>
+      </div>
+
+      <div class="ctrl" id="sigCtrl" style="display:none">
+        <label>Signature / Scan Mode</label>
+        <div class="chips" id="whitenChips">
+          <button class="chip active" data-v="off">Off</button>
+          <button class="chip" data-v="on"><i class="sw" style="background:#fff"></i>White karo (scan)</button>
+        </div>
+      </div>
+
+      <div class="ctrl" id="adjCtrl">
+        <label>☀️ Fine-tune <button class="chip mini" id="adjReset" type="button">Reset</button></label>
+        <div class="adjrow"><span>Brightness</span><input type="range" id="adjBright" min="50" max="160" step="5" value="100"></div>
+        <div class="adjrow"><span>Contrast</span><input type="range" id="adjContrast" min="50" max="180" step="5" value="100"></div>
       </div>
     </div>
 
@@ -190,8 +207,15 @@
     </section>
 
     <section class="card rcard" id="sheetCard">
-      <h3>🖨️ Print Sheet (4×6 inch)</h3>
+      <h3>🖨️ Print Sheet (4×6 inch / A4)</h3>
       <div class="preview"><img id="sheetPreview" alt="Print sheet preview"></div>
+      <div class="ctrl" style="margin:10px 0">
+        <label>Paper</label>
+        <div class="chips" id="paperChips">
+          <button class="chip active" data-v="4x6">4×6 inch</button>
+          <button class="chip" data-v="a4">A4</button>
+        </div>
+      </div>
       <div class="ctrl" style="margin:10px 0">
         <label>Copies</label>
         <div class="chips" id="copyChips">
@@ -215,6 +239,7 @@
     <h3>🕘 Recent Photos</h3>
     <ul class="history" id="historyList"></ul>
     <p class="hint" id="histEmpty">Abhi kuch nahi — pehli photo banayein!</p>
+    <p class="hint">History aapke phone me hi save hoti hai (offline).</p>
   </section>
 </main>
 

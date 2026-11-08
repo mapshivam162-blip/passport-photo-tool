@@ -12,6 +12,7 @@ const state={
   aspectMode:'passport', aspect:3.5/4.5, zoom:1, ox:0, oy:0,
   mode:'passport', targetKB:50, bg:'none', maxDim:600, copies:8,
   fileName:'photo', fileSize:0, srcURL:null,
+  filters:{bright:100,contrast:100}, whiten:'off', paper:'4x6',
   last:{blobURL:null,blob:null,name:'photo.jpg',kb:0,w:0,h:0,q:0},
   sheetURL:null, history:[]
 };
@@ -28,6 +29,15 @@ function showView(v){
 function hexRGB(h){return{r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)};}
 function canvasToBlob(c,type,q){return new Promise(r=>c.toBlob(r,type,q));}
 function kb(b){return (b.size/1024).toFixed(1)+' KB';}
+
+/* ---------- theme ---------- */
+function applyTheme(t){
+  document.body.dataset.theme = t==='dark' ? 'dark' : 'light';
+  $('themeBtn').textContent = t==='dark' ? '☀️' : '🌙';
+  try{localStorage.setItem('pm_theme',t);}catch(e){}
+}
+try{ applyTheme(localStorage.getItem('pm_theme')||'light'); }catch(e){ applyTheme('light'); }
+$('themeBtn').onclick=()=>applyTheme(document.body.dataset.theme==='dark'?'light':'dark');
 
 /* ---------- upload ---------- */
 function loadFile(file){
@@ -182,6 +192,7 @@ function setMode(m){
   $('modePassport').classList.toggle('active',m==='passport');
   $('modeCompress').classList.toggle('active',m==='compress');
   $('aspectCtrl').style.display = m==='passport' ? '' : 'none';
+  $('sigCtrl').style.display = m==='compress' ? '' : 'none';
   $('dimLabel').textContent = m==='passport' ? 'Output Width (px)' : 'Max Width (px)';
   if(m==='compress' && state.maxDim<800) setDim(1200);
   if(!state.img)return;
@@ -210,11 +221,29 @@ $('bgChips').addEventListener('click',e=>{
   state.bg=b.dataset.v;
   document.querySelectorAll('#bgChips .chip').forEach(c=>c.classList.toggle('active',c===b));
 });
+$('whitenChips').addEventListener('click',e=>{
+  const b=e.target.closest('.chip'); if(!b)return;
+  state.whiten=b.dataset.v;
+  document.querySelectorAll('#whitenChips .chip').forEach(c=>c.classList.toggle('active',c===b));
+});
+$('adjBright').addEventListener('input',e=>{state.filters.bright=+e.target.value;});
+$('adjContrast').addEventListener('input',e=>{state.filters.contrast=+e.target.value;});
+$('adjReset').onclick=()=>{
+  state.filters={bright:100,contrast:100};
+  $('adjBright').value=100; $('adjContrast').value=100;
+  toast('Fine-tune reset');
+};
 $('copyChips').addEventListener('click',e=>{
   const b=e.target.closest('.chip'); if(!b)return;
   state.copies=+b.dataset.v;
   document.querySelectorAll('#copyChips .chip').forEach(c=>c.classList.toggle('active',c===b));
-  if(state.last.blobURL) rebuildSheet();
+  if(state.last.blobURL && !viewResult.hidden) rebuildSheet();
+});
+$('paperChips').addEventListener('click',e=>{
+  const b=e.target.closest('.chip'); if(!b)return;
+  state.paper=b.dataset.v;
+  document.querySelectorAll('#paperChips .chip').forEach(c=>c.classList.toggle('active',c===b));
+  if(state.last.blobURL && !viewResult.hidden) rebuildSheet();
 });
 $('presetChips').addEventListener('click',e=>{
   const b=e.target.closest('.chip'); if(!b)return;
@@ -273,6 +302,33 @@ function changeBackground(srcCanvas,hex){
   return srcCanvas;
 }
 
+/* fine-tune: brightness/contrast via ctx.filter */
+function applyAdjust(src){
+  const f=state.filters;
+  if(f.bright===100 && f.contrast===100) return src;
+  const c=document.createElement('canvas'); c.width=src.width; c.height=src.height;
+  const ctx=c.getContext('2d');
+  try{ ctx.filter=`brightness(${f.bright}%) contrast(${f.contrast}%)`; }catch(e){}
+  ctx.drawImage(src,0,0);
+  ctx.filter='none';
+  return c;
+}
+/* signature whiten: light bg -> pure white, ink stays dark */
+function whitenScan(c){
+  const ctx=c.getContext('2d',{willReadFrequently:true});
+  const w=c.width,h=c.height;
+  const img=ctx.getImageData(0,0,w,h), d=img.data;
+  for(let i=0;i<d.length;i+=4){
+    const lum=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+    let v;
+    if(lum>175) v=255;
+    else v=Math.max(0,Math.min(255,(lum-28)*(235/147)));
+    d[i]=d[i+1]=d[i+2]=v;
+  }
+  ctx.putImageData(img,0,0);
+  return c;
+}
+
 /* target KB tak auto compress (quality + size dono adjust) */
 async function compressTo(srcCanvas,targetKB){
   let c=document.createElement('canvas');
@@ -298,11 +354,12 @@ async function compressTo(srcCanvas,targetKB){
   return {blob:await canvasToBlob(c,'image/jpeg',0.3),quality:30,canvas:c};
 }
 
-/* 4x6 inch print sheet (1200x1800 @300dpi) */
+/* 4x6 / A4 print sheet */
 function buildSheet(base){
-  const W=1200,H=1800,margin=44,gap=22;
+  const A4 = state.paper==='a4';
+  const W=A4?2480:1200, H=A4?3508:1800, margin=A4?96:44, gap=A4?48:22;
   const copies=state.copies;
-  const cols = copies<=4?2 : copies<=8?2 : 3;
+  const cols = A4 ? 4 : (copies<=8 ? 2 : 3);
   const rows = Math.ceil(copies/cols);
   const cellW=(W-2*margin-(cols-1)*gap)/cols;
   const cellH=(H-2*margin-(rows-1)*gap)/rows;
@@ -315,7 +372,7 @@ function buildSheet(base){
     const col=i%cols, row=Math.floor(i/cols);
     const x=margin+col*(cellW+gap)+(cellW-pw)/2;
     const y=margin+row*(cellH+gap)+(cellH-ph)/2;
-    ctx.strokeStyle='#d5dee9'; ctx.lineWidth=2;
+    ctx.strokeStyle='#d5dee9'; ctx.lineWidth=A4?5:2;
     ctx.strokeRect(x,y,pw,ph);
     ctx.drawImage(base,x,y,pw,ph);
   }
@@ -342,7 +399,9 @@ processBtn.onclick=async()=>{
   processBtn.textContent='⏳ Ban raha hai…';
   try{
     let base = state.mode==='passport' ? drawCropped(state.maxDim) : drawFull(state.maxDim);
-    if(state.bg!=='none') changeBackground(base,BG_COLORS[state.bg]);
+    base = applyAdjust(base);
+    if(state.mode==='compress' && state.whiten==='on') whitenScan(base);
+    else if(state.bg!=='none') changeBackground(base,BG_COLORS[state.bg]);
     const res=await compressTo(base,state.targetKB);
 
     const suffix = state.mode==='passport' ? 'passport-photo' : 'compressed';
@@ -383,20 +442,45 @@ processBtn.onclick=async()=>{
   }
 };
 
-/* ---------- history ---------- */
-function pushHistory(){
-  const L=state.last;
-  state.history.unshift({url:L.blobURL,name:L.name,kb:L.kb,w:L.w,h:L.h,ts:Date.now()});
-  state.history=state.history.slice(0,8);
+/* ---------- history (localStorage me save hoti hai) ---------- */
+const HKEY='pm_history_v1';
+function renderHistory(){
   const ul=$('historyList');
   ul.innerHTML='';
   state.history.forEach(e=>{
     const li=document.createElement('li');
-    li.innerHTML=`<img src="${e.url}" alt="thumb"><div class="hinfo"><b>${e.name}</b><span>${e.w}×${e.h}px • ${e.kb.toFixed(1)} KB</span></div><a href="${e.url}" download="${e.name}">⬇ Download</a>`;
+    const dl = e.data ? `<a href="${e.data}" download="${e.name}">⬇ Download</a>` : `<span class="hmut">thumb</span>`;
+    li.innerHTML=`<img src="${e.thumb}" alt="thumb"><div class="hinfo"><b>${e.name}</b><span>${e.w}×${e.h}px • ${e.kb.toFixed(1)} KB</span></div>${dl}`;
     ul.appendChild(li);
   });
   $('histEmpty').hidden=state.history.length>0;
 }
+function saveHistory(){
+  try{ localStorage.setItem(HKEY, JSON.stringify(state.history)); }catch(e){ /* quota full — ignore */ }
+}
+function loadHistory(){
+  try{
+    const raw=localStorage.getItem(HKEY);
+    if(raw) state.history=JSON.parse(raw)||[];
+  }catch(e){ state.history=[]; }
+  renderHistory();
+}
+function pushHistory(){
+  const L=state.last;
+  const entry={
+    name:L.name, kb:L.kb, w:L.w, h:L.h, ts:Date.now(),
+    thumb:null, data:null
+  };
+  const readAs=f=>new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f);});
+  readAs(L.blob).then(full=>{
+    entry.thumb=full;                            // chhoti file: poora data hi thumb
+    if(full.length<1.2*1024*1024) entry.data=full;
+    state.history.unshift(entry);
+    state.history=state.history.slice(0,8);
+    renderHistory(); saveHistory();
+  }).catch(()=>{});
+}
+loadHistory();
 
 /* ---------- actions ---------- */
 $('newBtn').onclick=()=>{showView(viewUpload);};
