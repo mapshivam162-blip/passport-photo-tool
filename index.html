@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Passport Photo Maker — Photo 20KB/50KB me Compress Karein (Free, Offline)</title>
+<meta name="description" content="SSC, Railway, UPSC form ke liye passport photo banayein aur 20KB/50KB/100KB me compress karein. 100% free, offline, photo upload nahi hoti.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0b3d91">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <svg class="logo" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+      <rect x="4" y="8" width="56" height="48" rx="8" fill="#1d6ff2"/>
+      <circle cx="32" cy="26" r="8" fill="#fff"/>
+      <path d="M16 50c3-9 9-13 16-13s13 4 16 13" fill="#fff"/>
+      <path d="M10 16l6 6M54 16l-6 6" stroke="#9ec5ff" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <div class="topbar-text">
+      <div class="brand">Passport Photo Maker</div>
+      <div class="brand-sub">Photo banayein • 20KB/50KB compress • Print sheet</div>
+    </div>
+    <span class="badge">100% FREE</span>
+  </div>
+</header>
+
+<!-- ============ VIEW: UPLOAD ============ -->
+<main id="viewUpload">
+
+  <section class="card hero">
+    <h1>Form ki Photo, <span class="hl">2 minute me ready</span></h1>
+    <p class="lead">SSC / Railway / UPSC / Bank — photo ko passport size me crop karein, background badlein, aur <b>20KB / 50KB / 100KB</b> me compress karein. <b>Photo kabhi phone se bahar nahi jati</b> — sab kaam aapke browser me hota hai.</p>
+    <div class="trust-row">
+      <span class="trust">🔒 No Upload</span>
+      <span class="trust">📶 Offline kaam karega</span>
+      <span class="trust">📱 Mobile friendly</span>
+      <span class="trust">🎞 Print sheet 4×6</span>
+    </div>
+
+    <div id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Photo chunein">
+      <div class="dz-icon">🖼️</div>
+      <div class="dz-title">Photo yahan drop karein</div>
+      <div class="dz-sub">ya neeche button dabayein — JPG / PNG</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary big" id="pickBtn">📂 Photo Chunein</button>
+      <button class="btn secondary big" id="camBtn">📷 Camera se Lein</button>
+    </div>
+    <input type="file" id="pickInput" accept="image/*" hidden>
+    <input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+    <p class="hint">Tip: photo select karne ke baad editor khulega — crop, size, background sab wahan set karein.</p>
+  </section>
+
+  <section class="card">
+    <h2>Kaise kaam karega?</h2>
+    <ol class="steps">
+      <li><b>Photo chunein</b> — gallery ya camera se.</li>
+      <li><b>Crop &amp; size set karein</b> — face ko frame ke beech me rakhein, target KB (20/30/50/100) chunein.</li>
+      <li><b>Download karein</b> — compressed photo + 4×6 print sheet, dono milegi.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Features</h2>
+    <div class="feat-grid">
+      <div class="feat"><div class="feat-i">✂️</div><b>Smart Crop</b><span>Passport 3.5×4.5, Square, Original — zoom &amp; drag</span></div>
+      <div class="feat"><div class="feat-i">🗜️</div><b>KB Target</b><span>20KB se 500KB tak, auto quality adjust</span></div>
+      <div class="feat"><div class="feat-i">🎨</div><b>Background</b><span>White / Blue / Gray (plain background par best)</span></div>
+      <div class="feat"><div class="feat-i">🖨️</div><b>Print Sheet</b><span>4×6 inch par 4·6·8·12 copies, PNG</span></div>
+      <div class="feat"><div class="feat-i">🔄</div><b>Rotate</b><span>Sideways photo seedhi karein</span></div>
+      <div class="feat"><div class="feat-i">✒️</div><b>Signature Mode</b><span>Signature / document bhi compress karein</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Common Questions</h2>
+    <details><summary>Meri photo server par upload hoti hai?</summary><p>Nahi. 100% kaam aapke phone ke browser me hota hai. Internet band ho tab bhi chalega (ek baar site khulne ke baad).</p></details>
+    <details><summary>Kaunsa size form ke liye sahi hai?</summary><p>SSC GD: 20–50KB, 413×531px. Railway RRB: 20KB ke aas-paas. UPSC: 40KB ke aas-paas. Neeche editor me "Popular Presets" diye hain — wahan se ek tap karein.</p></details>
+    <details><summary>Background kaise badlega?</summary><p>White / Blue / Gray option plain background (deewar) wali photo par best kaam karta hai. Complex background par result perfect nahi aayega.</p></details>
+    <details><summary>HEIC photo kaam karegi?</summary><p>Browser HEIC decode nahi kar paate. iPhone ki photo ko pehle "Files" app se JPG me convert karein, ya screenshot lein.</p></details>
+  </section>
+</main>
+
+<!-- ============ VIEW: EDITOR ============ -->
+<main id="viewEditor" hidden>
+  <section class="card">
+    <div class="seg" role="group" aria-label="Mode chunein">
+      <button class="seg-btn active" id="modePassport">🪪 Passport Photo</button>
+      <button class="seg-btn" id="modeCompress">🗜️ Sirf Compress / Signature</button>
+    </div>
+
+    <div id="cropWrap">
+      <div id="viewport" aria-label="Crop frame — drag karke photo hilayein">
+        <img id="cropImg" alt="Aapki photo" draggable="false">
+        <div class="grid-overlay" aria-hidden="true"></div>
+        <div class="face-guide" aria-hidden="true"></div>
+      </div>
+      <div class="zoomrow">
+        <button class="icon-btn" id="zoomOut" aria-label="Zoom kam">−</button>
+        <input type="range" id="zoomRange" min="1" max="4" step="0.05" value="1" aria-label="Zoom">
+        <button class="icon-btn" id="zoomIn" aria-label="Zoom badhayein">+</button>
+        <button class="chip" id="rotateBtn">⟳ Rotate</button>
+        <button class="chip" id="resetBtn">Reset</button>
+      </div>
+      <p class="hint">Photo ko drag karke face ko frame ke <b>beech</b> me rakhein. Pinch / scroll se zoom.</p>
+    </div>
+
+    <div class="controls">
+      <div class="ctrl" id="aspectCtrl">
+        <label>Crop Shape</label>
+        <div class="chips" id="aspectChips">
+          <button class="chip active" data-v="passport">Passport 3.5×4.5</button>
+          <button class="chip" data-v="square">Square 1×1</button>
+          <button class="chip" data-v="original">Original</button>
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <label id="dimLabel">Output Width (px)</label>
+        <div class="chips" id="dimChips">
+          <button class="chip" data-v="413">413 <small>SSC</small></button>
+          <button class="chip active" data-v="600">600 <small>Standard</small></button>
+          <button class="chip" data-v="800">800</button>
+          <button class="chip" data-v="1200">1200</button>
+          <button class="chip" data-v="1600">1600</button>
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <label>Target File Size: <b id="targetVal">50 KB</b></label>
+        <input type="range" id="targetRange" min="5" max="500" step="5" value="50" class="full">
+        <div class="chips" id="sizeChips">
+          <button class="chip" data-v="20">20KB</button>
+          <button class="chip" data-v="30">30KB</button>
+          <button class="chip active" data-v="50">50KB</button>
+          <button class="chip" data-v="100">100KB</button>
+          <button class="chip" data-v="200">200KB</button>
+          <button class="chip" data-v="0">No limit</button>
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <label>Background (plain photo par best)</label>
+        <div class="chips" id="bgChips">
+          <button class="chip active" data-v="none">Original</button>
+          <button class="chip" data-v="white"><i class="sw" style="background:#fff"></i>White</button>
+          <button class="chip" data-v="blue"><i class="sw" style="background:#e8f1fb"></i>Blue</button>
+          <button class="chip" data-v="gray"><i class="sw" style="background:#eef2f7"></i>Gray</button>
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <label>Popular Form Presets</label>
+        <div class="chips" id="presetChips">
+          <button class="chip" data-p='{"mode":"passport","dim":413,"kb":50}'>SSC 413×531 · 50KB</button>
+          <button class="chip" data-p='{"mode":"passport","dim":413,"kb":20}'>Railway · 20KB</button>
+          <button class="chip" data-p='{"mode":"passport","dim":600,"kb":40}'>UPSC · 40KB</button>
+          <button class="chip" data-p='{"mode":"compress","dim":1200,"kb":50}'>Signature · 50KB</button>
+          <button class="chip" data-p='{"mode":"passport","dim":600,"kb":0}'>Best Quality</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn primary big block" id="processBtn">✨ Photo Banayein</button>
+    <button class="btn ghost block" id="backBtn">← Nayi Photo Chunein</button>
+  </section>
+</main>
+
+<!-- ============ VIEW: RESULT ============ -->
+<main id="viewResult" hidden>
+  <section class="card">
+    <h2>✅ Ho Gaya! Download Karein</h2>
+    <table class="stats" id="statTable"></table>
+  </section>
+
+  <div class="result-grid">
+    <section class="card rcard">
+      <h3 id="mainCardTitle">Compressed Photo</h3>
+      <div class="preview"><img id="mainPreview" alt="Result preview"></div>
+      <a class="btn primary big block" id="mainDownload" download>⬇ Download Photo</a>
+      <p class="hint" id="mainMeta"></p>
+    </section>
+
+    <section class="card rcard" id="sheetCard">
+      <h3>🖨️ Print Sheet (4×6 inch)</h3>
+      <div class="preview"><img id="sheetPreview" alt="Print sheet preview"></div>
+      <div class="ctrl" style="margin:10px 0">
+        <label>Copies</label>
+        <div class="chips" id="copyChips">
+          <button class="chip" data-v="4">4</button>
+          <button class="chip" data-v="6">6</button>
+          <button class="chip active" data-v="8">8</button>
+          <button class="chip" data-v="12">12</button>
+        </div>
+      </div>
+      <button class="btn secondary big block" id="sheetDownload">⬇ Sheet Download (PNG)</button>
+      <p class="hint">Cyber café / photo studio se print karwayein — sasta padega.</p>
+    </section>
+  </div>
+
+  <section class="card actions">
+    <button class="btn secondary big" id="shareBtn">📤 Share Karein</button>
+    <button class="btn primary big" id="newBtn">🔄 Nayi Photo Banayein</button>
+  </section>
+
+  <section class="card">
+    <h3>🕘 Recent Photos</h3>
+    <ul class="history" id="historyList"></ul>
+    <p class="hint" id="histEmpty">Abhi kuch nahi — pehli photo banayein!</p>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>🔒 Privacy: aapki photo kabhi device se bahar nahi jati.<br>
+  Made for SSC · Railway · UPSC · Bank form candidates • Works offline after first load</p>
+</footer>
+
+<div id="toast" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>
